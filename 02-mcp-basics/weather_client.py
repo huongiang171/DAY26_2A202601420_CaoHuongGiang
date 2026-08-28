@@ -40,6 +40,14 @@ async def main() -> None:
                 print(f"\ncall_tool get_weather(city={city!r}):")
                 print("  ->", result.content[0].text)
 
+            print("\n" + "="*40 + "\n")
+
+            # 3. Thử gọi tool get_forecast mới thêm vào
+            for city in ["Hanoi", "Danang"]:
+                result = await session.call_tool("get_forecast", {"city": city, "days": 3})
+                print(f"call_tool get_forecast(city={city!r}, days=3):")
+                print("  ->", result.content[0].text)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

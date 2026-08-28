@@ -25,11 +25,27 @@ _MOCK_DB = {
     "Danang": "30°C, nhiều mây",
 }
 
+_FORECAST_DB = {
+    "Hanoi": "Ngày mai: 30°C, có mây. Ngày kia: 32°C, nắng.",
+    "Haiphong": "Ngày mai: 31°C, mưa rào. Ngày kia: 33°C, nắng nhẹ.",
+    "Danang": "Ngày mai: 32°C, nắng ráo. Ngày kia: 34°C, nắng nóng."
+}
 
 @mcp.tool()
 def get_weather(city: str) -> str:
     """Lấy thời tiết hiện tại của một thành phố."""
     return f"{city}: {_MOCK_DB.get(city, '28°C, không có dữ liệu chi tiết')}"
+
+@mcp.tool()
+def get_forecast(city: str, days: int = 2) -> str:
+    """Lấy dự báo thời tiết cho những ngày tới của một thành phố.
+    
+    Args:
+        city: Tên thành phố
+        days: Số ngày dự báo (mặc định 2)
+    """
+    forecast = _FORECAST_DB.get(city, "Không có dữ liệu dự báo cho thành phố này.")
+    return f"Dự báo {days} ngày tới cho {city}: {forecast}"
 
 
 if __name__ == "__main__":

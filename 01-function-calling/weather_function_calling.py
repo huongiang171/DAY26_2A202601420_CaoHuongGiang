@@ -11,6 +11,10 @@ Cách chạy:
 
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
+import os
+env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+load_dotenv(env_path)
 
 client = genai.Client()
 
@@ -38,7 +42,24 @@ get_weather_declaration = types.FunctionDeclaration(
     ),
 )
 
-TOOLS = [types.Tool(function_declarations=[get_weather_declaration])]
+get_forecast_declaration = types.FunctionDeclaration(
+    name="get_forecast",
+    description="Lấy dự báo thời tiết cho một số ngày tới của một thành phố",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "city": types.Schema(
+                type=types.Type.STRING, description="Tên thành phố"
+            ),
+            "days": types.Schema(
+                type=types.Type.INTEGER, description="Số ngày dự báo (ví dụ: 3)"
+            )
+        },
+        required=["city", "days"],
+    ),
+)
+
+TOOLS = [types.Tool(function_declarations=[get_weather_declaration, get_forecast_declaration])]
 
 
 # 2. App tự thực thi tool (trong thực tế sẽ gọi API thời tiết thật)
@@ -70,6 +91,16 @@ def get_weather(city: str) -> str:
     return json.dumps({"city": city, **mock_data.get(city, default)}, ensure_ascii=False)
 
 
+def get_forecast(city: str, days: int) -> str:
+    """Trả về dự báo thời tiết (mock) của *city* trong *days* ngày."""
+    import json
+    forecasts = []
+    for i in range(1, int(days) + 1):
+        forecasts.append({"ngày": f"Ngày +{i}", "nhiệt_độ": "26-32°C", "thời_tiết": "nhiều mây, có lúc có mưa rào"})
+    
+    return json.dumps({"city": city, "dự_báo": forecasts}, ensure_ascii=False)
+
+
 def run(prompt: str) -> str:
     """Gửi *prompt* tới Gemini, tự động xử lý function calling và trả về câu trả lời cuối."""
     contents: list[types.Content] = [
@@ -94,7 +125,14 @@ def run(prompt: str) -> str:
         function_responses = []
         for fc in resp.function_calls:
             print(f"  [model yêu cầu] {fc.name}({fc.args})")
-            result = get_weather(**fc.args)  # <-- app chạy, không phải model
+            
+            if fc.name == "get_weather":
+                result = get_weather(**fc.args)
+            elif fc.name == "get_forecast":
+                result = get_forecast(**fc.args)
+            else:
+                result = f"Lỗi: Không tìm thấy hàm {fc.name}"
+                
             print(f"  [app thực thi]  -> {result}")
             function_responses.append(
                 types.Part.from_function_response(
@@ -118,6 +156,6 @@ def run(prompt: str) -> str:
 
 
 if __name__ == "__main__":
-    question = "Thời tiết Hà Nội và Đà Nẵng hôm nay thế nào?"
+    question = "Thời tiết Hà Nội hôm nay thế nào? Và dự báo thời tiết 3 ngày tới ở Đà Nẵng ra sao?"
     print(f"User: {question}\n")
     print("Trả lời:", run(question))

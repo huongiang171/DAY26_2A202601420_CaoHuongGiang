@@ -1,0 +1,13 @@
+--- BƯỚC 1: USE CASE ---
+
+Công việc hiện tại:
+Tra cứu thông tin đơn hàng của khách hàng và kiểm tra số lượng tồn kho của các sản phẩm.
+
+Tôi đang làm thủ công như thế nào:
+Mỗi lần khách hàng hoặc bộ phận vận chuyển hỏi trạng thái đơn hàng hoặc khi cần kiểm tra tồn kho để bán hàng, tôi phải mở phần mềm quản lý cơ sở dữ liệu SQLite (hoặc file excel), chạy câu lệnh truy vấn SQL (SELECT status FROM orders...) hoặc gõ tìm kiếm thủ công tên sản phẩm để kiểm tra số lượng còn lại trong kho.
+
+Input:
+Mã đơn hàng cần kiểm tra (ví dụ: "OD-101", "OD-102") hoặc Tên sản phẩm cần tra cứu tồn kho (ví dụ: "Laptop", "Mouse").
+
+Output:
+Trạng thái hiện tại của đơn hàng (ví dụ: "Delivered", "Shipping", "Pending") kèm theo chi tiết sản phẩm trong đơn, hoặc số lượng tồn kho còn lại của mặt hàng được yêu cầu (ví dụ: "Sản phẩm Laptop còn 15 cái").
